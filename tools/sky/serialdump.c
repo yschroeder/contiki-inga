@@ -119,6 +119,9 @@ int main(int argc, char **argv)
 	} else if (strcmp(&argv[index][2], "115200") == 0) {
 	  speed = B115200;
 	  speedname = "115200";
+	} else if (strcmp(&argv[index][2], "500000") == 0) {
+	  speed = B500000;
+	  speedname = "500000";
 	} else {
 	  fprintf(stderr, "unsupported speed: %s\n", &argv[index][2]);
 	  return usage(1);
@@ -168,11 +171,9 @@ int main(int argc, char **argv)
   }
   fprintf(stderr, "connecting to %s (%s)", device, speedname);
 
-#if defined __APPLE__ && defined __MACH__
+#ifndef __APPLE__
   fd = open(device, O_RDWR | O_NOCTTY | O_NDELAY | O_SYNC );
 #else
-  fd = open(device, O_RDWR | O_NOCTTY | O_NDELAY | O_DIRECT | O_SYNC );
-#endif
   fd = open(device, O_RDWR | O_NOCTTY | O_NDELAY | O_SYNC );
 #endif
   if (fd <0) {
