@@ -43,9 +43,9 @@ import org.jdom.Element;
 import org.contikios.cooja.ClassDescription;
 import org.contikios.cooja.Mote;
 import org.contikios.cooja.MoteInterface;
-import org.contikios.cooja.MoteMemory;
-import org.contikios.cooja.MoteMemory.MemoryEventType;
-import org.contikios.cooja.MoteMemory.MemoryMonitor;
+import org.contikios.cooja.mote.memory.Memory;
+import org.contikios.cooja.mote.memory.Memory.MemoryMonitor;
+import org.contikios.cooja.mote.memory.VarMemory;
 
 /**
  * Read-only interface to Rime address read from Contiki variable: linkaddr_node_addr.
@@ -57,7 +57,7 @@ import org.contikios.cooja.MoteMemory.MemoryMonitor;
 @ClassDescription("Rime address")
 public class RimeAddress extends MoteInterface {
   private static Logger logger = Logger.getLogger(RimeAddress.class);
-  private MoteMemory moteMem;
+  private VarMemory moteMem;
 
   public static final int RIME_ADDR_LENGTH = 2;
 
@@ -67,8 +67,9 @@ public class RimeAddress extends MoteInterface {
     moteMem = mote.getMemory();
     if (hasRimeAddress()) {
       memMonitor = new MemoryMonitor() {
-        public void memoryChanged(MoteMemory memory, MemoryEventType type, int address) {
-          if (type != MemoryEventType.WRITE) {
+        @Override
+        public void memoryChanged(Memory memory, MemoryMonitor.EventType type, long address) {
+          if (type != MemoryMonitor.EventType.WRITE) {
             return;
           }
           setChanged();
@@ -76,7 +77,7 @@ public class RimeAddress extends MoteInterface {
         }
       };
       /* TODO XXX Timeout? */
-      moteMem.addMemoryMonitor(moteMem.getVariableAddress("linkaddr_node_addr"), RIME_ADDR_LENGTH, memMonitor);
+      moteMem.addMemoryMonitor(MemoryMonitor.EventType.WRITE, moteMem.getVariableAddress("linkaddr_node_addr"), RIME_ADDR_LENGTH, memMonitor);
     }
   }
 

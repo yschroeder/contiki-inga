@@ -64,7 +64,7 @@ import javax.swing.text.PlainDocument;
 
 import org.jdom.Element;
 
-import org.contikios.cooja.AddressMemory;
+import org.contikios.cooja.mote.memory.Memory;
 import org.contikios.cooja.ClassDescription;
 import org.contikios.cooja.Cooja;
 import org.contikios.cooja.Mote;
@@ -72,7 +72,8 @@ import org.contikios.cooja.MotePlugin;
 import org.contikios.cooja.PluginType;
 import org.contikios.cooja.Simulation;
 import org.contikios.cooja.VisPlugin;
-import org.contikios.cooja.AddressMemory.UnknownVariableException;
+import org.contikios.cooja.mote.memory.UnknownVariableException;
+import org.contikios.cooja.mote.memory.VarMemory;
 
 /**
  * Variable Watcher enables a user to watch mote variables during a simulation.
@@ -87,7 +88,7 @@ import org.contikios.cooja.AddressMemory.UnknownVariableException;
 public class VariableWatcher extends VisPlugin implements MotePlugin {
   private static final long serialVersionUID = 1L;
 
-  private AddressMemory moteMemory;
+  private VarMemory moteMemory;
 
   private final static int LABEL_WIDTH = 170;
   private final static int LABEL_HEIGHT = 15;
@@ -124,7 +125,7 @@ public class VariableWatcher extends VisPlugin implements MotePlugin {
   public VariableWatcher(Mote moteToView, Simulation simulation, Cooja gui) {
     super("Variable Watcher (" + moteToView + ")", gui);
     this.mote = moteToView;
-    moteMemory = (AddressMemory) moteToView.getMemory();
+    moteMemory = moteToView.getMemory();
 
     JLabel label;
     integerFormat = NumberFormat.getIntegerInstance();
@@ -172,7 +173,7 @@ public class VariableWatcher extends VisPlugin implements MotePlugin {
 
     varType = new JComboBox();
     varType.addItem("Byte (1 byte)"); // BYTE_INDEX = 0
-    varType.addItem("Integer (" + moteMemory.getIntegerLength() + " bytes)"); // INT_INDEX = 1
+    varType.addItem("Integer (" + moteMemory.getMemoryLayout().intSize + " bytes)"); // INT_INDEX = 1
     varType.addItem("Byte array (x bytes)"); // ARRAY_INDEX = 2
     varType.addItem("Char array (x bytes)"); // CHAR_ARRAY_INDEX = 3
 

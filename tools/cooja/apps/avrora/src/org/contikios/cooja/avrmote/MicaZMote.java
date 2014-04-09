@@ -40,12 +40,12 @@ import org.jdom.Element;
 import org.contikios.cooja.Mote;
 import org.contikios.cooja.MoteInterface;
 import org.contikios.cooja.MoteInterfaceHandler;
-import org.contikios.cooja.MoteMemory;
 import org.contikios.cooja.MoteType;
 import org.contikios.cooja.Simulation;
 import org.contikios.cooja.motes.AbstractEmulatedMote;
 import avrora.arch.avr.AVRProperties;
 import avrora.core.LoadableProgram;
+import avrora.core.SourceMapping;
 import avrora.sim.AtmelInterpreter;
 import avrora.sim.Simulator;
 import avrora.sim.State;
@@ -53,6 +53,10 @@ import avrora.sim.mcu.AtmelMicrocontroller;
 import avrora.sim.mcu.EEPROM;
 import avrora.sim.platform.MicaZ;
 import avrora.sim.platform.PlatformFactory;
+import avrora.sim.types.SingleSimulation;
+import java.nio.ByteOrder;
+import org.contikios.cooja.mote.memory.MemoryLayout;
+import org.contikios.cooja.mote.memory.MoteMemory;
 
 /**
  * @author Joakim Eriksson, Fredrik Osterlind
@@ -68,7 +72,7 @@ public class MicaZMote extends AbstractEmulatedMote implements Mote {
   private MicaZ micaZ = null;
   private LoadableProgram program = null;
   private AtmelInterpreter interpreter = null;
-  private AvrMoteMemory myMemory = null;
+  private MoteMemory myMemory = null;
   private AVRProperties avrProperties = null;
   private MicaZMoteType myMoteType = null;
 
@@ -135,6 +139,7 @@ public class MicaZMote extends AbstractEmulatedMote implements Mote {
   protected void prepareMote(File file) throws Exception {
     program = new LoadableProgram(file);
     program.load();
+    SourceMapping sourceMapping = program.getProgram().getSourceMapping();
     PlatformFactory factory = new MicaZ.Factory();
     micaZ = (MicaZ) factory.newPlatform(1, program.getProgram());
     myCpu = (AtmelMicrocontroller) micaZ.getMicrocontroller();
@@ -144,7 +149,9 @@ public class MicaZMote extends AbstractEmulatedMote implements Mote {
     Simulator sim = myCpu.getSimulator();
     interpreter = (AtmelInterpreter) sim.getInterpreter();
 //     State state = interpreter.getState();
-    myMemory = new AvrMoteMemory(program.getProgram().getSourceMapping(), avrProperties, interpreter);
+    MemoryLayout memLayout = new MemoryLayout(ByteOrder.LITTLE_ENDIAN, MemoryLayout.ARCH_8BIT, 2);
+    AvrMoteMemory avrmem = new AvrMoteMemory(sourceMapping, avrProperties, interpreter);
+    myMemory = new MoteMemory(memLayout, avrmem);
   }
 
   public void setEEPROM(int address, int i) {
@@ -269,7 +276,7 @@ public class MicaZMote extends AbstractEmulatedMote implements Mote {
   }
 
   public void setMemory(MoteMemory memory) {
-    myMemory = (AvrMoteMemory) memory;
+    myMemory = memory;
   }
 
   public String toString() {

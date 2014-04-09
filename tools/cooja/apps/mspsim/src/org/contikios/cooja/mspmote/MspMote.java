@@ -34,6 +34,7 @@ import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
@@ -45,12 +46,13 @@ import org.contikios.cooja.Cooja;
 import org.contikios.cooja.Mote;
 import org.contikios.cooja.MoteInterface;
 import org.contikios.cooja.MoteInterfaceHandler;
-import org.contikios.cooja.MoteMemory;
+import org.contikios.cooja.mote.memory.MoteMemory;
 import org.contikios.cooja.MoteType;
 import org.contikios.cooja.Simulation;
 import org.contikios.cooja.Watchpoint;
 import org.contikios.cooja.WatchpointMote;
 import org.contikios.cooja.interfaces.IPAddress;
+import org.contikios.cooja.mote.memory.MemoryLayout;
 import org.contikios.cooja.motes.AbstractEmulatedMote;
 import org.contikios.cooja.mspmote.interfaces.Msp802154Radio;
 import org.contikios.cooja.mspmote.interfaces.MspSerial;
@@ -92,8 +94,9 @@ public abstract class MspMote extends AbstractEmulatedMote implements Mote, Watc
 
   private CommandHandler commandHandler;
   private MSP430 myCpu = null;
+  private final MemoryLayout memLayout;
   private MspMoteType myMoteType = null;
-  private MspMoteMemory myMemory = null;
+  private MoteMemory myMemory = null;
   private MoteInterfaceHandler myMoteInterfaceHandler = null;
   public ComponentRegistry registry = null;
 
@@ -105,6 +108,7 @@ public abstract class MspMote extends AbstractEmulatedMote implements Mote, Watc
   public MspMote(MspMoteType moteType, Simulation simulation) {
     this.simulation = simulation;
     myMoteType = moteType;
+    memLayout = new MemoryLayout(ByteOrder.LITTLE_ENDIAN, MemoryLayout.ARCH_16BIT, 2); /** @TODO: check! */
 
     /* Schedule us immediately */
     requestImmediateWakeup();
@@ -190,7 +194,7 @@ public abstract class MspMote extends AbstractEmulatedMote implements Mote, Watc
   }
 
   public void setMemory(MoteMemory memory) {
-    myMemory = (MspMoteMemory) memory;
+    myMemory = memory;
   }
 
   /**
@@ -239,7 +243,7 @@ public abstract class MspMote extends AbstractEmulatedMote implements Mote, Watc
     /* Create mote address memory */
     MapTable map = ((MspMoteType)getType()).getELF().getMap();
     MapEntry[] allEntries = map.getAllEntries();
-    myMemory = new MspMoteMemory(this, allEntries, myCpu);
+    myMemory = new MoteMemory(memLayout, new MspMoteMemory(allEntries, myCpu));
 
     myCpu.reset();
   }
