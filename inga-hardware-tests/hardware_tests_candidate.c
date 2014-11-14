@@ -10,6 +10,7 @@
 #include "dev/acc-sensor.h"
 #include "dev/battery-sensor.h"
 #include "dev/gyro-sensor.h"
+#include "dev/mag-sensor.h"
 #include "dev/pressure-sensor.h"
 #include "dev/at45db.h"
 #include "sensor-tests.h"
@@ -213,7 +214,17 @@ PROCESS_THREAD(rime_unicast_sender, ev, data)
 		at45db_write_page(0,0,orig_data,512);
 		TESTS_PRINT_RESULT("Flash");
 		test_num++;
+    //TODO mag test
+	}else if(test_num==6){
+		uint8_t test_res = mag_sensor.status(SENSORS_READY) && !mag_sensor.status(SENSORS_ACTIVE) && SENSORS_ACTIVATE(mag_sensor) && mag_sensor.status(SENSORS_ACTIVE);
+		TEST_ASSERT("Mag sensor failed to init",test_res);
 
+		//TODO: test values
+
+		test_res = SENSORS_DEACTIVATE(mag_sensor) && /*!acc_sensor.status(SENSORS_ACTIVE) &&*/ mag_sensor.status(SENSORS_READY);
+		TEST_ASSERT("Mag failed deactivate",test_res);
+		TESTS_PRINT_RESULT("Mag");
+		test_num++;
 	}else{
 		TESTS_DONE();
 	}
