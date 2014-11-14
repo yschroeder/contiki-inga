@@ -37,7 +37,6 @@ recv_uc(struct unicast_conn *c, const linkaddr_t *from)
 	  unicast_send(&uc, &addr);
 	  printf("send: %s\n",buff_);
 	  rec_count++;
-    TEST_PASS();
   }
   
   // check if done
@@ -53,6 +52,7 @@ PROCESS_THREAD(rime_unicast_sender, ev, data)
   PROCESS_EXITHANDLER(unicast_close(&uc));
 
   PROCESS_BEGIN();
+  TEST_PASS();
 
 
   unicast_open(&uc, 146, &unicast_callbacks); // channel = 145
