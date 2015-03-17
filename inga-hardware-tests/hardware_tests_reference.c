@@ -3,7 +3,7 @@
  */
 
 #include "contiki.h"
-#include "net/rime.h"
+#include "net/rime/rime.h"
 
 #include <stdio.h>
 #include "test.h"
@@ -20,14 +20,14 @@ AUTOSTART_PROCESSES(&rime_unicast_sender);
 static struct unicast_conn uc;
 static uint8_t rec_count = 0;
 static void
-recv_uc(struct unicast_conn *c, const rimeaddr_t *from)
+recv_uc(struct unicast_conn *c, const linkaddr_t *from)
 {
 
   printf("unicast message received from %x.%x: '%s'\n", from->u8[0], from->u8[1], (char *) packetbuf_dataptr());
   sprintf(buff_, NET_TEST_CFG_REQUEST_MSG, rec_count);
   printf("packet: %s\n buff: %s\n",(char *) packetbuf_dataptr(), buff_);
   if(strcmp((char *) packetbuf_dataptr(), buff_) == 0){
-	  static rimeaddr_t addr;
+	  static linkaddr_t addr;
 	  addr.u8[0] = 2 & 0xFF;
 	  addr.u8[1] = 0 >> 8;
 	  static int8_t idx = 0;
