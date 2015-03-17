@@ -28,6 +28,8 @@
 #define BATTERY_TEST_CFG_MAX_I  100
 /*--- ---*/
 
+#define REFERENCE_LINK_ADDR 0x0001
+
 static struct unicast_conn uc;
 static char buff_[30];
 static uint8_t radio_done=0;
@@ -105,8 +107,8 @@ PROCESS_THREAD(rime_unicast_sender, ev, data)
   static struct etimer et;
   static linkaddr_t addr;
 
-  addr.u8[0] = 1 & 0xFF;
-  addr.u8[1] = 0 >> 8;
+  addr.u16 = UIP_HTONS(REFERENCE_LINK_ADDR);
+
   static int8_t idx = 0;
   char buff_[30] = {'\0'};
   static uint8_t test_num =0;
