@@ -223,11 +223,19 @@ uint64_t inga_serial_to_id(const char * serial)
 			character = 42;
 		}
 
-		return_value = (return_value << 6) | (character & 0x3F);
+    /*printf("serial[%d]: 0x%x (%c) character[%d]: 0x%x \n", i, serial[i], serial[i], i, character);*/
+
+		return_value = (return_value << 3) | (character & 0x3F);
 	}
 
 	/* Insert FFFE as required by http://msdn.microsoft.com/en-us/library/aa915616.aspx */
-	return_value = ((return_value & 0xFFFFFF000000) << 16) | (((uint64_t) 0xFEFF) << 24) | (return_value & 0x00000000FFFFF);
+	/*return_value = ((return_value & 0xFFFFFF000000) << 16) | (((uint64_t) 0xFEFF) << 24) | (return_value & 0x00000000FFFFF);*/
+  /*return_value = ((return_value << 24)& 0x000000EFFF252494); */
+  /*return_value &= 0x0000000000FFFFFF;*/
+
+  /*printf("return_value 0x%x\n", return_value);*/
+  return_value = (return_value << 40) | 0x000000FEFF524249; 
+  /*printf("return_value 0x%x\n", return_value);*/
 
 	/* Insert 00 */
 	return_value &= 0xFFFFFFFFFFFFFF7F;
