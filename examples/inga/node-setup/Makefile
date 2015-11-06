@@ -16,7 +16,7 @@ CONTIKI = ../../..
 
 # Check environment values and set to defined default if not set
 ifndef EUI64
-	EUI64=$($(CONTIKI)/tools/inga/inga_tool/inga_tool -e -d $(MOTES) | cut -d":" -f2-)
+	EUI64 = $(shell $(CONTIKI)/tools/inga/inga_tool/inga_tool -e -d $(MOTES) | cut -d":" -f2-)
 endif
 
 setup: SETTINGS_SET_LOAD = 1
