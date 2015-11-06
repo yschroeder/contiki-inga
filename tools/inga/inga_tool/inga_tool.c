@@ -216,7 +216,7 @@ uint64_t inga_serial_to_id(const char * serial)
 	int character = 0;
 	uint64_t return_value = 0;
 
-	for(i=0; i<8; i++) {
+	for(i=8; i>0; i--) {
 		character = serial[i] - 48; // "0" == 48, Z == 42
 
 		if( character > 42 ) {
