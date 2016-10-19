@@ -48,6 +48,8 @@
 #define INGA_V14  14
 /** Inga revision 1.5  */
 #define INGA_V15  15
+/** Inga revision 1.5  */
+#define INGA_V16  16
 /** Inga revision 2.0  */
 #define INGA_V20  20
 
@@ -63,9 +65,9 @@
 
 #define PLATFORM       PLATFORM_AVR
 
-#if INGA_REVISION == INGA_V12 || INGA_REVISION == INGA_V13 || INGA_REVISION == INGA_V14 || INGA_REVISION == INGA_V15
+#if INGA_REVISION == INGA_V12 || INGA_REVISION == INGA_V13 || INGA_REVISION == INGA_V14 || INGA_REVISION == INGA_V15 || INGA_REVISION == INGA_V16
 #define PLATFORM_TYPE INGA_RF23X_A
-#endif /* Inga rev 1.2 - 1.5 */
+#endif /* Inga rev 1.2 - 1.6 */
 
 #define PLATFORM_HAS_BUTTON 1
 
