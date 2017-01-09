@@ -69,6 +69,8 @@ public class AvroraClock extends Clock {
   private long timeDrift; /* Microseconds */
   private long startTime,lastTime,lastCycles;
 
+  private double deviation;
+
   private Timer repaintTimer = new Timer(150, new ActionListener() {
     public void actionPerformed(ActionEvent e) {
       updatePanel();
@@ -107,6 +109,16 @@ public class AvroraClock extends Clock {
   public long getDrift() {
     return timeDrift;
   }
+
+  public void setDeviation(double deviation) {
+	      assert (deviation>0.0) && (deviation<=1.0);
+	          this.deviation = deviation;
+		    }
+
+  public double getDeviation() {
+	      return deviation;
+	        }
+
 
   private JLabel timeLabel, cyclesLabel, stateLabel, watchLabel;
   private void updatePanel() {

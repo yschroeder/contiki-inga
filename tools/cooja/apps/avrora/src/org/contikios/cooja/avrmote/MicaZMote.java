@@ -143,7 +143,7 @@ public class MicaZMote extends AbstractEmulatedMote implements Mote {
     program = new LoadableProgram(file);
     program.load();
     PlatformFactory factory = new MicaZ.Factory();
-    micaZ = (MicaZ) factory.newPlatform(1, program.getProgram());
+    micaZ = (MicaZ) factory.newPlatform(1, null, program.getProgram());
     myCpu = (AtmelMicrocontroller) micaZ.getMicrocontroller();
     eeprom = (EEPROM) myCpu.getDevice("eeprom");
     
