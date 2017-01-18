@@ -3,34 +3,39 @@ settings_set_src = settings_set.c
 # Note: this variable can be modified by setting target-specific variable
 SETTINGS_SET_LOAD=1
 
+# Inform about loading of app
+$(info [APP.settings_set] loaded with:)
 # PAN_ADDR
 ifdef PAN_ADDR
- CFLAGS += -DINGA_CONF_PAN_ADDR=$(PAN_ADDR)
+  $(info [APP.settings_set] PAN_ADDR: "$(PAN_ADDR)")
+  CFLAGS += -DINGA_CONF_PAN_ADDR=$(PAN_ADDR)
 endif
 
 # PANID
 ifdef PAN_ID
- CFLAGS += -DINGA_CONF_PAN_ID=$(PAN_ID)
+  $(info [APP.settings_set] PAN_ID: "$(PAN_ID)")
+  CFLAGS += -DINGA_CONF_PAN_ID=$(PAN_ID)
 endif
 
 # RADIO CHANNEL
 ifdef RADIO_CHANNEL
- CFLAGS += -DINGA_CONF_RADIO_CHANNEL=$(RADIO_CHANNEL)
+  $(info [APP.settings_set] RADIO_CHANNEL: "$(RADIO_CHANNEL)")
+  CFLAGS += -DINGA_CONF_RADIO_CHANNEL=$(RADIO_CHANNEL)
 endif
 
 # RADIO TX POWER
 ifdef RADIO_TX_POWER
- CFLAGS += -DINGA_CONF_RADIO_TX_POWER=$(RADIO_TX_POWER)
+  $(info [APP.settings_set] RADIO_TX_POWER: "$(RADIO_TX_POWER)")
+  CFLAGS += -DINGA_CONF_RADIO_TX_POWER=$(RADIO_TX_POWER)
 endif
 
 # EUI64
 ifdef EUI64
+  $(info [APP.settings_set] EUI64: "$(EUI64)")
   CONF_EUI64 := $(shell echo $(EUI64) | sed 's/\([0-9a-fA-F]\{2\}\)/0x\1/g' | sed 's/:/,/g')
   CFLAGS += -DINGA_CONF_EUI64=$(CONF_EUI64)
 endif
 
-# Inform about loading of app
-$(info [APP.settings_set] loaded)
 # Activate app if needed
 CFLAGS+=-DAPP_SETTINGS_SET=$(SETTINGS_SET_LOAD)
 
