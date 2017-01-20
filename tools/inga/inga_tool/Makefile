@@ -32,9 +32,12 @@ endif
 POPT_CFLAGS := `pkg-config --cflags popt`
 POPT_LDLIBS := `pkg-config --libs popt`
 
+# Use pkg-config to determine the compiler and linker flag for openssl
+OPENSSL_CFLAGS := `pkg-config --cflags openssl`
+OPENSSL_LDLIBS := `pkg-config --libs openssl`
 
-CFLAGS=${FTDI_CFLAGS} ${POPT_CFLAGS} ${LIBUDEV_CFLAGS} -DFTDI_VERSION="${FTDI_VERSION}" -ggdb
-LDLIBS=${FTDI_LDLIBS} ${POPT_LDLIBS} ${LIBUDEV_LDLIBS}
+CFLAGS=${FTDI_CFLAGS} ${OPENSSL_CFLAGS} ${POPT_CFLAGS} ${LIBUDEV_CFLAGS} -DFTDI_VERSION="${FTDI_VERSION}" -ggdb
+LDLIBS=${FTDI_LDLIBS} ${OPENSSL_LDLIBS} ${POPT_LDLIBS} ${LIBUDEV_LDLIBS}
 
 # Standard recipes to make inga_tool
 
