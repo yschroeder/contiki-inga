@@ -41,6 +41,7 @@
 #include <unistd.h>
 
 #include <popt.h>
+#include <openssl/sha.h>
 
 #include "inga_usb.h"
 
@@ -210,32 +211,42 @@ void inga_print_eeinfo(struct config_t *cfg)
 			info.cbus[1], info.cbus[0], info.cbus[3], info.cbus[2], info.cbus[4]);
 }
 
+uint32_t crc32_bitwise(const void* data, size_t length, uint32_t previousCrc32) 
+{
+	uint32_t crc = ~previousCrc32;
+	unsigned char* current = (unsigned char*) data;
+	while (length--)   
+	{     
+		printf("current: %c\n", current[0]);
+		crc ^= *current++;     
+		for (unsigned int j = 0; j < 8; j++)       
+			crc = (crc >> 1) ^ (-(int)(crc & 1) & 0x55555555);   
+	}   
+	return ~crc; // same as crc ^ 0xFFFFFFFF 
+} 
+
 uint64_t inga_serial_to_id(const char * serial)
 {
 	int i = 0;
 	int character = 0;
 	uint64_t return_value = 0;
 
-	for(i=8; i>0; i--) {
-		character = serial[i] - 48; // "0" == 48, Z == 42
+	/*printf("serial len: %d\n", strlen(serial));*/
 
-		if( character > 42 ) {
-			character = 42;
-		}
+	unsigned char hash[SHA_DIGEST_LENGTH];
+	SHA1(serial, strlen(serial), hash);
 
-    /*printf("serial[%d]: 0x%x (%c) character[%d]: 0x%x \n", i, serial[i], serial[i], i, character);*/
-
-		return_value = (return_value << 3) | (character & 0x3F);
-	}
+	/*printf("hash: %x %x %x\n", hash[0], hash[1], hash[2]);*/
+	return_value = ((uint32_t)hash[0]) << 16 | ((uint32_t)hash[1]) << 8 | ((uint32_t)hash[2]) << 0;
 
 	/* Insert FFFE as required by http://msdn.microsoft.com/en-us/library/aa915616.aspx */
 	/*return_value = ((return_value & 0xFFFFFF000000) << 16) | (((uint64_t) 0xFEFF) << 24) | (return_value & 0x00000000FFFFF);*/
-  /*return_value = ((return_value << 24)& 0x000000EFFF252494); */
-  /*return_value &= 0x0000000000FFFFFF;*/
+	/*return_value = ((return_value << 24)& 0x000000EFFF252494); */
+	/*return_value &= 0x0000000000FFFFFF;*/
 
-  /*printf("return_value 0x%x\n", return_value);*/
-  return_value = (return_value << 40) | 0x000000FEFF524249; 
-  /*printf("return_value 0x%x\n", return_value);*/
+	/*printf("return_value 0x%x\n", return_value);*/
+	return_value = (return_value << 40) | 0x000000FEFF524249; 
+	/*printf("return_value 0x%x\n", return_value);*/
 
 	/* Insert 00 */
 	return_value &= 0xFFFFFFFFFFFFFF7F;
