@@ -4,7 +4,7 @@
 
 #include <string.h>
 
-#include "net/uip-debug.h"
+#include "net/ip/uip-debug.h"
 
 #define UIP_IP_BUF    ((struct uip_ip_hdr *)&uip_buf[UIP_LLH_LEN])
 #define UIP_UDP_BUF   ((struct uip_udp_hdr *)&uip_buf[uip_l2_l3_hdr_len])
