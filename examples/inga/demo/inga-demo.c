@@ -14,6 +14,7 @@
 #include "gyro-sensor.h"
 #include "pressure-sensor.h"
 #include "battery-sensor.h"
+#include "mag-sensor.h"
 #include "dev/sdcard.h"           //tested
 
 #include <util/delay.h>
@@ -43,8 +44,7 @@ PROCESS_THREAD(default_app_process, ev, data)
   static const struct sensors_sensor *press_sensor;
   static const struct sensors_sensor *gyro_sensor;
   static const struct sensors_sensor *batt_sensor;
-  static const struct sensors_sensor *mag_sensor;
-  
+  static const struct sensors_sensor *mag_sensor;  
   
 
 #if DEBUG
@@ -74,9 +74,12 @@ PROCESS_THREAD(default_app_process, ev, data)
   batt_sensor = sensors_find("Batt");
   uint8_t batt_status = SENSORS_ACTIVATE(*batt_sensor);
   if (batt_status == 0) printf("Error: Failed to init battery-sensor\n");
-  else printf("Battery Sensor: OK\n");
+  else printf("Battery sensor: OK\n");
 
-
+  mag_sensor = sensors_find("Mag");
+  uint8_t mag_status = SENSORS_ACTIVATE(*mag_sensor);
+  if (mag_status == 0) printf("Error: Failed to init magnetic sensor\n");
+  else printf("Magnetic sensor: OK\n");
 
 //  if (bmp085_init() == 0) {
 //    printf(":BMP085    OK\n");
@@ -103,6 +106,9 @@ PROCESS_THREAD(default_app_process, ev, data)
 
   batt_sensor = sensors_find("Batt");
   uint8_t batt_status = SENSORS_ACTIVATE(*batt_sensor);
+
+  mag_sensor = sensors_find("Mag");
+  uint8_t mag_status = SENSORS_ACTIVATE(*mag_sensor);
 #endif
 
   etimer_set(&timer, 0.05*CLOCK_SECOND);
@@ -140,7 +146,17 @@ PROCESS_THREAD(default_app_process, ev, data)
     //              tmp = adc_get_value_from(PWR_MONITOR_ICC_ADC);
     //             
     //              tmp = adc_get_value_from(PWR_MONITOR_VCC_ADC);
-    //             
+    //            
+
+    /*############################################################*/
+    //Magnetic Monitoring
+    printf("Mag - x: %d, y: %d, z: %d\n",
+          mag_sensor->value(MAG_X_RAW),
+          mag_sensor->value(MAG_Y_RAW),
+          mag_sensor->value(MAG_Z_RAW));
+
+
+    /*############################################################*/
     /*############################################################*/
     //microSD Test
     //              uint8_t buffer[512];
