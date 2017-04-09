@@ -8,13 +8,13 @@
  *
  */
 
+
 #include "contiki.h"
-#include "dev/adxl345.h"             //tested
+#include "acc-sensor.h"
+#include "gyro-sensor.h"
+#include "pressure-sensor.h"
+#include "battery-sensor.h"
 #include "dev/sdcard.h"           //tested
-#include "dev/at45db.h"            //tested
-#include "dev/bmp085.h"         //tested
-#include "dev/l3g4200d.h"           //tested
-#include "dev/adc.h"
 
 #include <util/delay.h>
 #include <stdio.h>
@@ -37,27 +37,47 @@ PROCESS_THREAD(default_app_process, ev, data)
 {
   PROCESS_BEGIN();
 
-  _delay_ms(100);
+  _delay_ms(100); //just wait a short period to ensure are sensors are available
+  
+  static const struct sensors_sensor *acc_sensor;
+  static const struct sensors_sensor *press_sensor;
+  static const struct sensors_sensor *gyro_sensor;
+  static const struct sensors_sensor *batt_sensor;
+  static const struct sensors_sensor *mag_sensor;
+  
+  
 
 #if DEBUG
   printf("Begin initialization:\n");
-
+  SDCARD_POWER_ON();
   if (sdcard_init() == 0) {
     printf(":microSD   OK\n");
     SDCARD_POWER_OFF();
   } else {
     printf(":microSD   FAILURE\n");
   }
-  if (adxl345_init() == 0) {
-    printf(":ADXL345   OK\n");
-  } else {
-    printf(":ADXL345   FAILURE\n");
-  }
-  if (at45db_init() == 0) {
-    printf(":AT45DBxx  OK\n");
-  } else {
-    printf(":AT45DBxx  FAILURE\n");
-  }
+  acc_sensor = sensors_find("Acc");
+  uint8_t acc_status = SENSORS_ACTIVATE(*acc_sensor);
+  if (acc_status == 0) printf("Error: Failed to init accelerometer\n");
+  else printf("Accelerometer: OK\n");
+  
+  press_sensor = sensors_find("Press");
+  uint8_t press_status = SENSORS_ACTIVATE(*press_sensor);
+  if (press_status == 0) printf("Error: Failed to init pressure sensor\n"); 
+  else printf("Pressure sensor: OK\n");
+  
+  gyro_sensor = sensors_find("Gyro");
+  uint8_t gyro_status = SENSORS_ACTIVATE(*gyro_sensor);
+  if (gyro_status == 0) printf("Error: Failed to init gyroscope\n");
+  else printf("Gyroscrope: OK\n");
+  
+  batt_sensor = sensors_find("Batt");
+  uint8_t batt_status = SENSORS_ACTIVATE(*batt_sensor);
+  if (batt_status == 0) printf("Error: Failed to init battery-sensor\n");
+  else printf("Battery Sensor: OK\n");
+
+
+
 //  if (bmp085_init() == 0) {
 //    printf(":BMP085    OK\n");
 //  } else {
@@ -69,45 +89,54 @@ PROCESS_THREAD(default_app_process, ev, data)
 //    printf(":L3G4200D  FAILURE\n");
 //  }
 #else
-  adxl345_init();
   microSD_switchoff();
-  at45db_init();
   microSD_init();
-  bmp085_init();
-  l3g4200d_init();
+ 
+  acc_sensor = sensors_find("Acc");
+  uint8_t acc_status = SENSORS_ACTIVATE(*acc_sensor);
+  
+  press_sensor = sensors_find("Press");
+  uint8_t press_status = SENSORS_ACTIVATE(*press_sensor);
+  
+  gyro_sensor = sensors_find("Gyro");
+  uint8_t gyro_status = SENSORS_ACTIVATE(*gyro_sensor);
+
+  batt_sensor = sensors_find("Batt");
+  uint8_t batt_status = SENSORS_ACTIVATE(*batt_sensor);
 #endif
 
-  adc_init(ADC_SINGLE_CONVERSION, ADC_REF_2560MV_INT);
-  etimer_set(&timer, CLOCK_SECOND * 0.05);
-
+  etimer_set(&timer, 0.05*CLOCK_SECOND);
+  
   while (1) {
-
     PROCESS_YIELD();
     etimer_set(&timer, CLOCK_SECOND);
 
     /*############################################################*/
-    //ADXL345 serial Test
-    printf("X:%+6d | Y:%+6d | Z:%+6d\n",
-            adxl345_get_x(),
-            adxl345_get_y(),
-            adxl345_get_z());
+    //Accelerometer serial Test
+    printf("Accelerometer - X:%+6d | Y:%+6d | Z:%+6d\n",
+            acc_sensor->value(ACC_X),
+            acc_sensor->value(ACC_Y),
+            acc_sensor->value(ACC_Z));
 
     /*############################################################*/
-    //L3G4200d serial Test
-    printf("X:%+6d | Y:%+6d | Z:%+6d\n",
-            l3g4200d_get_x_angle(),
-            l3g4200d_get_y_angle(),
-            l3g4200d_get_z_angle());
-    printf("T1:%+3d\n", l3g4200d_get_temp());
+    //Gyroscop serial Test
+    printf("Gyroscope - X:%+6d | Y:%+6d | Z:%+6d\n",
+            gyro_sensor->value(GYRO_X),
+            gyro_sensor->value(GYRO_Y),
+            gyro_sensor->value(GYRO_Z));
+    printf("Gyro Temperature:%+3d\n", gyro_sensor->value(GYRO_TEMP));
 
     /*############################################################*/
-    //BMP085 serial Test
-    printf("P:%+6ld\n", (uint32_t) bmp085_read_pressure(BMP085_HIGH_RESOLUTION));
-    printf("T2:%+3d\n", bmp085_read_temperature());
+    //Pressure serial Test 
+    int32_t pressval = ((int32_t) press_sensor->value(PRESS_H) << 16);
+    pressval |= (press_sensor->value(PRESS_L) & 0xFFFF);
+    printf("Pressure - :%+8ld\n", pressval);
+    printf("Pressure Temperature:%+3d\n", press_sensor->value(TEMP));
 
     /*############################################################*/
     //Power Monitoring
-    printf("V:%d\n", adc_get_value_from(PWR_MONITOR_ICC_ADC));
+    printf("V: %d, I: %d\n", batt_sensor->value(BATTERY_VOLTAGE),
+        batt_sensor->value(BATTERY_CURRENT));
     //              tmp = adc_get_value_from(PWR_MONITOR_ICC_ADC);
     //             
     //              tmp = adc_get_value_from(PWR_MONITOR_VCC_ADC);
